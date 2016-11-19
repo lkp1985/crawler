@@ -67,6 +67,7 @@ public static void httpPostWithJSON(String url, String json) throws Exception {
 	 public static boolean dama2(){
 		 try{
 
+			 System.out.println("begin dama");
 	    		String url = "http://www.tianyancha.com/act/create.json";
 	   		 JSONObject obj = new JSONObject();
 	   		 obj.put("tid", "TYCID=c9218d7449af44fc9ba9da2f7ad6a8b5;");
@@ -90,7 +91,7 @@ public static void httpPostWithJSON(String url, String json) throws Exception {
 	    		httppost.setEntity(new UrlEncodedFormEntity(nvps, Consts.UTF_8));*/
 	    		DefaultHttpClient httpClient = new DefaultHttpClient();
   		 HttpHost proxy = new HttpHost("139.129.133.235", 3000);  
-	    		 httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,    null);  
+	    		 httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,    proxy);  
 	    		httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 6000); 
 	    		httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 6000);
 	    		 
@@ -103,6 +104,7 @@ public static void httpPostWithJSON(String url, String json) throws Exception {
 	    	  //      System.out.println("result="+result);
 	    	        JSONObject resultobj = JSONObject.fromObject(result);
 	    	        if(resultobj.get("state").equals("ok")){
+	    	        	System.out.println("dama success");
 	    	        	httpClient.close();
 	    	        	return true;
 	    	        }

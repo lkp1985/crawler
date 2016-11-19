@@ -56,7 +56,7 @@ public class TYCMain {
 		System.out.println("keyowrds=" + keywords);
 		headParams = new HashMap<String, String>();
 		headParams.put("Host", "www.tianyancha.com");
-		headParams.put("Proxy-Connection", "keep-alive");
+		headParams.put("Proxy-Connection", "keep-alive"); 
 		headParams.put("Accept", "*/*");
 		headParams.put("Accept-Language", "zh-CN,en-US;q=0.8,en;q=0.6");
 		headParams.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
@@ -459,7 +459,7 @@ public class TYCMain {
 					if(page==0){
 						return;
 					}
-					Thread.sleep(500);
+					 
 					LOGGER.info("area=" + area + ";code=" + code + ",page=" + page + ";keywords=" + keywords);
 					for (int i = 2; i <= page; i++) {
 						String newkeywords = URLEncoder.encode(keywords);
@@ -467,7 +467,7 @@ public class TYCMain {
 								+ "&category=" + code + "&"+zczb;//&type=scope"+
 						LOGGER.info("url=" + url);
 						url += "&base=" + area;
-						Proxy proxy = null;// HttpProxy. getProxy();
+						Proxy proxy = HttpProxy.getProxy2();
 						String body = HttpProxy.getHttpRequestContentByGet(url, proxy, headParams);
 						int ind = 0;
 						while (body == null || body.length() < 10) {
@@ -479,7 +479,7 @@ public class TYCMain {
 							Utils.dama2();
 							// proxy = HttpProxy. getProxy();
 							body = HttpProxy.getHttpRequestContentByGet(url, proxy, headParams);
-							Thread.sleep(500);
+							 
 						}
 						
 						try {
