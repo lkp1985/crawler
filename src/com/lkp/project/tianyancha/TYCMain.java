@@ -40,7 +40,7 @@ import net.sf.json.JSONObject;
  * @author lkp
  *
  */
-public class TYCMain {
+public class TYCMain { 
 	private static final Log LOGGER = LogFactory.getLog(TYCMain.class);
 	private static final LinkedBlockingDeque<Runnable> taskQueue = new LinkedBlockingDeque<Runnable>(10);
 	private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(3, 6, 20, TimeUnit.SECONDS, taskQueue,
