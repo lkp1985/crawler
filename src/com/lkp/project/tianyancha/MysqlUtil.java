@@ -15,7 +15,7 @@ import java.util.Map;
  
  
 public class MysqlUtil {
-	static String url = "jdbc:mysql://192.168.0.102:3306/tyc?"
+	static String url = "jdbc:mysql://localhost:3306/tyc?"//192.168.0.102
             + "user=root&password=root&useUnicode=true&characterEncoding=UTF8";
 	static Connection conn = null;
 	static Statement stmt = null;
@@ -95,9 +95,12 @@ public class MysqlUtil {
 				psts.setString(3, basic.getBase()); 
 				psts.addBatch();
 			}
-			psts.executeBatch();
+			int[] nums = psts.executeBatch();
 			conn.commit();
-			total = total+list.size();
+			for(int num : nums){
+				total += num;
+			}
+			//total = total+list.size();
 			System.out.println("insert to mysql "+ list.size()+" record success ,total:" + total);
 		}catch(Exception e){
 			e.printStackTrace();

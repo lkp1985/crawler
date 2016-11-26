@@ -456,6 +456,7 @@ public class TYCMain {
 				List<String> zczbList = Utils.getzibenList();
 				for(String zczb : zczbList){
 					int page = getPage(area, code);
+					Thread.sleep(500);
 					if(page==0){
 						return;
 					}
@@ -467,8 +468,9 @@ public class TYCMain {
 								+ "&category=" + code + "&"+zczb;//&type=scope"+
 						LOGGER.info("url=" + url);
 						url += "&base=" + area;
-						Proxy proxy = HttpProxy.getProxy2();
+						Proxy proxy = null;//HttpProxy.getProxy2();
 						String body = HttpProxy.getHttpRequestContentByGet(url, proxy, headParams);
+						Thread.sleep(500);
 						int ind = 0;
 						while (body == null || body.length() < 10) {
 							// LOGGER.info("proxy:"+proxy+" error,headers= "

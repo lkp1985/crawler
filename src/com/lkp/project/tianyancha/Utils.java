@@ -90,7 +90,8 @@ public static void httpPostWithJSON(String url, String json) throws Exception {
 	    		nvps.add(new BasicNameValuePair("_", query));
 	    		httppost.setEntity(new UrlEncodedFormEntity(nvps, Consts.UTF_8));*/
 	    		DefaultHttpClient httpClient = new DefaultHttpClient();
-  		 HttpHost proxy = new HttpHost("139.129.133.235", 3000);  
+  		 HttpHost proxy = null;//new HttpHost("139.129.133.235", 3000);  
+  		 System.out.println("proxy==="+proxy);
 	    		 httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,    proxy);  
 	    		httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 6000); 
 	    		httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 6000);
