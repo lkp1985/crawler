@@ -36,9 +36,9 @@ public class RequestThread implements Runnable{
 				JSONObject bodyJson = JSONObject.fromObject(body);
 				JSONArray array = bodyJson.getJSONArray("data");
 			
-				List<CompanyDto> companyList = new ArrayList<CompanyDto>();
+				List<BdlyDto> companyList = new ArrayList<BdlyDto>();
 				for(Object obj : array){
-					CompanyDto company = new CompanyDto();
+					BdlyDto company = new BdlyDto();
 					companyList.add(company);
 					JSONObject objJson = JSONObject.fromObject(obj);
 					company.setId(objJson.getString("id"));

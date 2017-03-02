@@ -6,18 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
  
  
  
 public class MysqlUtil {
 	static int total = 0;
-	static String url = "jdbc:mysql://192.168.0.105:3306/test?"
+	static String url = "jdbc:mysql://localhost:3306/crawler?"
             + "user=root&password=root&useUnicode=true&characterEncoding=UTF8";
 	static Connection conn = null;
 	static Statement stmt = null;
@@ -29,15 +25,14 @@ public class MysqlUtil {
 	 * "usedBondName":"","bondName":"","bondNum":"","bondType":"","newtestName":"",
 	 * "regNumber":"500102000051642","orgNumber":"","creditCode":"","businessScope":null,"contantMap":null}
 	 */
-	static String insert_sql1 = "replace into company_qy(id,name,legalPersonName,base,regStatus,regNumber,"
-			+ "creditCode,scope,reggov,regmoney) values (?,?,?,?,?,?,?,?,?,?)";
-	static String insert_sql2 = "update company"
-			+ " set postcode=?,phoneNumber=?,email=?,postalAddress=?,shareholderList=?,"
-			+ "yearReport=?  where id=?";
-	static String queryLimit10 = "select * from company where readstatus=0 limit 5";
-	
-	static String updateReadStatusSql = "update company set readstatus=? , scope=? where id= ?";//每次有结果返回，就该数值置为1，表示该数据已经拿到经营范围
-	static String updateReadStatusSql2 = "update company set readstatus=?  where id= ?";//每取一次就临时将readstatus=2,表示已经取但可能还没有抓的数据
+	static String insert_sql1 = "insert ignore  into sourceurl_china(url,name,readstatus) values (?,?,?)";
+	static String insert_sql2 = "replace into bdly_china(sid,url,sname,address,phone,price,besttime,bestvisittime,"
+			+ "traffic,map_info,impression,more_desc,type,ticket_info,open_time_desc,score,commentnum,point,readstatus) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+	static String insert_sql3 = "replace into remark(sid,page,remark) values (?,?,?)";
+	static String queryLimit5_2 = "select * from sid where readstatus=0 limit 5";
+	static String queryLimit5 = "select * from sourceurl_china where readstatus=0 limit 5";
+	static String updateReadStatusSql = "update sourceurl_china set readstatus=?  where url= ?";//每次有结果返回，就该数值置为1，表示该数据已经开始去拿基本信息
+	static String updateReadStatusSql2 = "update sid set readstatus=?  where sid= ?";//每次有结果返回，就该数值置为1，表示该数据已经开始去拿评论
 	public static void init(){
 		try{
 			 Class.forName("com.mysql.jdbc.Driver");// 动态加载mysql驱动
@@ -52,136 +47,151 @@ public class MysqlUtil {
 	}
 	 
 	
-	public static void insertScope(Map<String,String> map){
+	public static void insertJingdianUrl(List<String> urlList){
 		try{
-			PreparedStatement psts = conn.prepareStatement(updateReadStatusSql);
-			for(String id : map.keySet()){
-				String href = map.get(id);
-				psts.setInt(1, 1);
-				psts.setString(2, href);
-				psts.setString(3, id);
-				psts.addBatch();
-			}
-			psts.executeBatch();
-			conn.commit();
-			System.out.println("insert success :"+map.size());
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-	
-	
-	public static Map<String,String > getCompanyQueryCondition(){
-		Map<String,String> map = new HashMap<String,String>();
-		try{
-			stmt = conn.createStatement();
-			
-			ResultSet rs = stmt.executeQuery(queryLimit10);
-			PreparedStatement psts = conn.prepareStatement(updateReadStatusSql2);
-			while(rs.next()){
-				
-				String id = rs.getString("id");
-			//	System.out.println("id="+id);
-				String name = rs.getString("name");
-				map.put(id, name);
-				psts.setInt(1, 2); 
-				psts.setString(2, id);
-				psts.addBatch();
-			}
-			psts.executeBatch();
-			conn.commit();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return map;
-	}
-	
-	
-	public static Map<String,String > getCompanyQueryCondition2(){
-		Map<String,String> map = new HashMap<String,String>();
-		try{
-			stmt = conn.createStatement();
-			
-			ResultSet rs = stmt.executeQuery(queryLimit10);
-			PreparedStatement psts = conn.prepareStatement(updateReadStatusSql2);
-			while(rs.next()){
-				
-				String id = rs.getString("id");
-			//	System.out.println("id="+id);
-				String regNumber = rs.getString("regNumber");
-				map.put(id, regNumber);
-				psts.setInt(1, 2); 
-				psts.setString(2, id);
-				psts.addBatch();
-			}
-			psts.executeBatch();
-			conn.commit();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return map;
-	}
-	
-	
-	public static void insertCompanyBasic(List<CompanyDto> companyList){
-		try{
-			
 			PreparedStatement psts = conn.prepareStatement(insert_sql1);
-			for(CompanyDto dto : companyList){
-					int index=1;
-					 psts.setString(index++, dto.getId());
-		            psts.setString(index++, dto.getName());
-		            psts.setString(index++, dto.getLegalPersonName());
-		            psts.setString(index++, dto.getBase());
-		            psts.setString(index++, dto.getRegStatus()); 
-		            psts.setString(index++, dto.getRegNumber());
-		            psts.setString(index++, dto.getCreditCode());
-		            psts.setString(index++, dto.getScope());
-		            psts.setString(index++, dto.getRegGov());
-		            psts.setString(index++, dto.getRegMoney());
-		            psts.addBatch();          // 加入批量处理
-		           
+			for(String url : urlList){
+				psts.setString(1, url); 
+				psts.setString(2, ""); 
+				psts.setInt(3, 0); 
+				psts.addBatch();
 			}
-	        psts.executeBatch(); // 执行批量处理
-	        conn.commit();  // 提交
-	        total += companyList.size();
-	        System.out.println("insert  " + companyList.size()+" success,total insert "+ total+" 条");
-	       // conn.close();
-			
+			psts.executeBatch();
+			conn.commit();
+			System.out.println("insert url :"+urlList+" success");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
-	public static void insertCompanyDetail(List<CompanyDto> companyList){
+	public static void insertJingdianUrl(String url,String name){
 		try{
-			int total = 0;
-			PreparedStatement psts = conn.prepareStatement(insert_sql2);
-			for(CompanyDto dto : companyList){
-				if(dto.getId() ==null){
-					continue;
-				}
-				total ++;
-				int index = 1;
-		            psts.setString(index++, dto.getPostcode());
-		            psts.setString(index++, dto.getPhoneNumber());
-		            psts.setString(index++, dto.getEmail());
-		            psts.setString(index++, dto.getPostalAddress());
-		            psts.setString(index++, dto.getShareholderList());
-		            psts.setString(index++, dto.getYearReport()); 
-					 psts.setString(index++, dto.getId());
-		            psts.addBatch();          // 加入批量处理
-		            
-			}
-	        psts.executeBatch(); // 执行批量处理
-	        conn.commit();  // 提交
-	        System.out.println("insert     " + total +" success");
-	       // conn.close();
-			
+			PreparedStatement psts = conn.prepareStatement(insert_sql1);
+			psts.setString(1, url); 
+			psts.setString(2, name); 
+			psts.setInt(3, 0); 
+			psts.addBatch();
+			psts.executeBatch();
+			conn.commit();
+			System.out.println("insert url :"+url+" success");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	
+	 
+	
+	public static List<String> getSourceUrlList(){
+		List<String> urlList = new ArrayList<String>();
+		try{
+			stmt = conn.createStatement();
+			
+			ResultSet rs = stmt.executeQuery(queryLimit5);
+			PreparedStatement psts = conn.prepareStatement(updateReadStatusSql);
+			while(rs.next()){
+				String url = rs.getString("url");
+				urlList.add(url);
+				psts.setInt(1, 1); 
+				psts.setString(2, url);
+				psts.addBatch();
+			}
+			psts.executeBatch();
+			conn.commit();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return urlList;
 	}
 	 
+	public static List<String> getSourceUrlList2(){
+		List<String> urlList = new ArrayList<String>();
+		try{
+			stmt = conn.createStatement();
+			
+			ResultSet rs = stmt.executeQuery(queryLimit5_2);
+			PreparedStatement psts = conn.prepareStatement(updateReadStatusSql2);
+			while(rs.next()){
+				String url = rs.getString("sid");
+				if(url!=null){
+					urlList.add(url);
+					 
+				}
+				
+				psts.setInt(1, 1); 
+				psts.setString(2, url);
+				psts.addBatch();
+			}
+			 
+			psts.executeBatch();
+			conn.commit();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return urlList;
+	}
+	
+	public static void insertRemark(String url,int page,String remark){
+		try{
+			//url,address,phone,price,besttime,bestvistime,traffic,map_info,impression,more_desc,
+			//type,ticket_info,open_time_desc
+			PreparedStatement psts = conn.prepareStatement(insert_sql3);
+			int index=1;
+			psts.setString(index++, url);
+			psts.setInt(index++, page);
+			psts.setString(index++, remark);
+			psts.execute();
+			conn.commit();
+			total++;
+//			if(total%10000==0){
+//				conn.close();
+//				 conn = DriverManager.getConnection(url);
+//		            conn.createStatement();
+//		            conn.setAutoCommit(false);
+//			}
+			System.out.println("insert remark  " + url +" success");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	public static void insertJingdianBasic(List<BdlyDto> list){
+		try{
+			//url,address,phone,price,besttime,bestvistime,traffic,map_info,impression,more_desc,
+			//type,ticket_info,open_time_desc
+			PreparedStatement psts = conn.prepareStatement(insert_sql2);
+			for(BdlyDto dto : list){ 
+				int index=1;
+				psts.setString(index++, dto.getSid());
+				psts.setString(index++, dto.getUrl());
+				psts.setString(index++, dto.getName());
+				psts.setString(index++, dto.getAddress());
+				psts.setString(index++, dto.getPhone());
+				psts.setString(index++, dto.getPrice());
+				psts.setString(index++, dto.getBesttime());
+				psts.setString(index++, dto.getBestvisittime());
+				psts.setString(index++, dto.getTraffic());
+				psts.setString(index++, dto.getMap_info());
+				psts.setString(index++, dto.getImpression());
+				psts.setString(index++, dto.getMor_desc());
+				psts.setString(index++, dto.getLytype());
+				psts.setString(index++, dto.getTicket_info());
+				psts.setString(index++, dto.getOpen_time_desc());
+				psts.setString(index++, dto.getScore());
+				psts.setString(index++, dto.getCommentnum());
+				psts.setString(index++, dto.getPoint());
+				psts.setInt(index++,0);
+				psts.addBatch();
+			}
+			int total = 0;
+			int[] result_num = psts.executeBatch();
+			for(int num : result_num){
+				total += num;
+			}
+			conn.commit();
+			System.out.println("insert bdlyinfo  " + total +" success");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
 	
     public static void main(String[] args) throws Exception {
         Connection conn = null;
